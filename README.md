@@ -1,0 +1,2 @@
+# Hasdoku
+Haskell Sudoku
