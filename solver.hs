@@ -1,3 +1,4 @@
+import System.Console.Terminfo (Point(col))
 type Sudoku = [[Int]]
 
 -- Ein eindeutig lösbares Sudoku-Rätsel
@@ -15,16 +16,16 @@ sudokuExample =
     [0, 0, 0, 0, 8, 0, 0, 7, 9]
   ]
 
--- --          Array    col    row    num
--- isValid :: Sudoku -> Int -> Int -> Int -> Bool
--- isValid s c r n =
---   let x = put s c r n
---    in validColum x && validRow x && validBox x
+--             Array    col    row    num
+validInput :: Sudoku -> Int -> Int -> Int -> Bool
+validInput s c r n =
+  let x = put s c r n
+   in validColum x c && validRow x r && validBox x c r
 
 --     Array     col    row    num    ArrayResult
 put :: Sudoku -> Int -> Int -> Int -> Sudoku
 put s col row num =   take row s ++
-                [replaceIndex (s !! row) col num] ++   -- (drop (r-1)(take r s)) = (s !! r)
+                [replaceIndex (s !! row) col num] ++
                 drop (row+1) s
 
 replaceIndex :: [Int] -> Int -> Int -> [Int]
@@ -33,3 +34,18 @@ replaceIndex s c n =    take c s ++
                         drop (c+1) s
 
 
+validColum :: Sudoku -> Int -> Bool
+validColum s col    | (x:xs) = getCol s col
+                    | countElem xs x > 1 = False
+                    | otherwise validColum 
+
+
+countElem :: [Int] -> Int -> Int
+
+getCol :: Sudoku -> Int -> [Int]
+
+validRow :: Sudoku -> Bool
+validRow = _
+
+validBox :: Sudoku -> Bool
+validBox = _
