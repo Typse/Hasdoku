@@ -1,5 +1,6 @@
 import System.Console.Terminfo (Point (col))
 import System.FilePath (isValid)
+import Data.List
 
 type Sudoku = [[Int]]
 
@@ -43,28 +44,16 @@ replaceIndex s c n =
 validColumn :: Sudoku -> Int -> Bool
 validColumn s col = validLine(getColumn s col)
 
+validRow :: Sudoku -> Int -> Bool
+validRow s row = validLine(s !! row)
+
 -- Hilffunktion: gibt die Column rückwärts!!!
 getColumn :: Sudoku -> Int -> [Int]
-getColumn [] col = []
-getColumn s col = [(last s) !! col] ++ getColumn (init s) col
+getColumn s col = map (!! col) s
 
--- Überprüft ein Array auf valide
+-- Überprüft ein Array auf valide, nub filter alle duplikate, length gibt die länge aus
 validLine :: [Int] -> Bool
-validLine [] = True
-validLine (x : xs)
-  | not (isNum (x : xs)) || countElem xs x >= 1 = False
-  | otherwise = validLine xs
-
--- Hilfsfunktion
-countElem :: [Int] -> Int -> Int
-countElem [] _ = 0
-countElem (x : xs) num
-                        | (num == x) && (num /= 0) = 1 + countElem xs num
-                        | otherwise = countElem xs num
-
---Hilfsfunktion: Schaut Zahlen nur aus 0 bis 9 bestehen
-isNum :: [Int] -> Bool
-isNum [] = True
-isNum (l : ls)  | elem l [0 .. 9] = isNum ls
-                | otherwise = False
+validLine xs =
+  let nonZero = filter (/= 0) xs
+  in length nonZero == length (nub nonZero)
 
