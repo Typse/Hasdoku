@@ -50,15 +50,17 @@ getColumn s col = [(last s) !! col] ++ getColumn (init s) col
 
 -- Überprüft ein Array auf valide
 validLine :: [Int] -> Bool
+validLine [] = True
 validLine (x : xs)
-  | not (isNum (x : xs)) || countElem xs x > 1 = False
+  | not (isNum (x : xs)) || countElem xs x >= 1 = False
   | otherwise = validLine xs
 
 -- Hilfsfunktion
 countElem :: [Int] -> Int -> Int
+countElem [] _ = 0
 countElem (x : xs) num
-  | x == num = 1 + countElem xs num
-  | otherwise = countElem xs num
+                        | (num == x) && (num /= 0) = 1 + countElem xs num
+                        | otherwise = countElem xs num
 
 --Hilfsfunktion: Schaut Zahlen nur aus 0 bis 9 bestehen
 isNum :: [Int] -> Bool
