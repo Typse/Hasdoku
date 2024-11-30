@@ -4,7 +4,8 @@
 
 type Sudoku = [[Int]]
 
--- value + seed -> random value
+-- value + seed -> random value\
+-- funktionier absolut schlecht
 seed :: Int
 seed = 2
 fakeRandom :: Int -> Int
