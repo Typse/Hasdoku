@@ -1,6 +1,5 @@
 module Generator (
   emptySudoku,
-  sudokuExample,
   generateSudoku,
   generatePuzzle,
   isSolved,
