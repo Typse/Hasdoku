@@ -47,7 +47,8 @@ updateSudoku sudoku = do
                     printSudoku solvedSudoku
                     return solvedSudoku
                 else do
-                    putStrLn "hallo ich bin nutzlos! Weil die generierten sudokus immer loesbar sind"
+                    putStrLn "Es wurde eine falsche zahl platziert"
+                    putStrLn "Sudoku ist so nicht loesbar"
                     return sudoku
         else if isValid sudoku row col num
             then return (put sudoku row col num)
