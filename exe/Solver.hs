@@ -3,8 +3,6 @@ solve
 ) where
 
 import Data.List
---import System.Console.Terminfo (Point (col))
---import System.FilePath (isValid)
 
 type Sudoku = [[Int]]
 

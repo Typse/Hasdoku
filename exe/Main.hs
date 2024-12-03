@@ -23,16 +23,18 @@ formatSudoku sudoku = concatMap formatBlock [0, 3, 6] -- concatMap wendet /forma
 -- Benutzer-Eingabe
 getUserInput :: IO (Int, Int, Int)
 getUserInput = do
-        putStrLn "Gebe die Zeile (1-9) ein:"
-        row <- readLn
-        if row == -1
-            then return (-1, -1, -1)
-            else do
-                putStrLn "Gebe die Spalte (1-9) ein:"
-                col <- readLn
-                putStrLn "Gebe die Zahl (1-9) ein:"
-                num <- readLn
-                return (row-1, col-1, num)
+    putStrLn "Gebe die Eingabe im Format 'Zeile Spalte Zahl' (z.B. '1 2 3') oder '-1' ein:"
+    input <- getLine
+    if input == "-1"
+        then return (-1, -1, -1)
+        else do
+            let parts = map read (words input) :: [Int]
+            if length parts == 3
+                then let [row, col, num] = parts
+                     in return (row - 1, col - 1, num)
+                else do
+                    putStrLn "Ungültiges Format. Bitte erneut versuchen."
+                    getUserInput
 
 -- Aktualisiert das Sudoku-Feld mit der Benutzereingabe
 updateSudoku :: Sudoku -> IO Sudoku
@@ -60,7 +62,7 @@ updateSudoku sudoku = do
 -- Hauptspiel-Funktion
 playSudoku :: Sudoku -> IO ()
 playSudoku sudoku = do
-  putStrLn "Aktuelles Sudoku:"
+  putStrLn "\nAktuelles Sudoku:\n---------------------"
   printSudoku sudoku
   if isSolved sudoku
     then putStrLn "GZ. it's solved haha"
@@ -71,8 +73,8 @@ playSudoku sudoku = do
 -- Beispiel-Hauptfunktion
 main :: IO ()
 main = do
-  putStrLn "Generiere ein zufaelliges Raetsel..."
-  putStrLn "Mit -1 als Starteingabe loest du sofort das Sudoku"
+  putStrLn "\nGeneriere ein zufaelliges Raetsel..."
+  putStrLn "\nMit -1 als Starteingabe loest du sofort das Sudoku"
   generatedSudoku <- generateSudoku
   puzzle <- generatePuzzle generatedSudoku 40  -- 40 Felder werden geleert
   playSudoku puzzle
