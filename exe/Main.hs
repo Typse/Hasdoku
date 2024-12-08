@@ -9,21 +9,19 @@ type Sudoku = [[Int]]
 printSudoku :: Sudoku -> IO ()
 printSudoku sudoku = do
     putStrLn $ unlines $ formatSudoku sudoku
---  putStrLn $ unlines [unwords (map (\n -> if n == 0 then "." else show n) row) | row <- sudoku]
 
 formatSudoku :: Sudoku -> [String]
-formatSudoku sudoku = concatMap formatBlock [0, 3, 6] -- concatMap wendet /formatBlock/ in jeder 3. Zeile / Spalte an
+formatSudoku sudoku = concatMap formatBlock [0, 3, 6]
   where
-  -- Hilfsfunktion für formatSudoku
     formatBlock r =
-      [ concatMap (\c -> unwords (map (\n-> if n == 0 then "." else show n) (take 3 (drop c (sudoku !! (r + i))))) ++ " | ") [0, 3, 6] | i <- [0..2]]
+      [ concatMap (\c -> unwords (map (\n -> if n == 0 then "." else show n) (take 3 (drop c (sudoku !! (r + i))))) ++ " | ") [0, 3, 6] | i <- [0..2]]
       ++ [divider]
-    divider = replicate 21 '-'  -- Linie zwischen den 3x3-Blöcken
+    divider = replicate 21 '-'
 
 -- Benutzer-Eingabe
 getUserInput :: IO (Int, Int, Int)
 getUserInput = do
-    putStrLn "Gebe die Eingabe im Format 'Zeile Spalte Zahl' (z.B. '1 2 3') oder '-1' ein:"
+    putStrLn "Gebe die Eingabe im Format 'Zeile Spalte Zahl' (z.B. '1 2 3') oder '-1' um abzubrechen ein:"
     input <- getLine
     if input == "-1"
         then return (-1, -1, -1)
@@ -36,45 +34,59 @@ getUserInput = do
                     putStrLn "Ungültiges Format. Bitte erneut versuchen."
                     getUserInput
 
+-- Benutzerwahl für Anzahl der leeren Felder
+getPuzzleDifficulty :: IO Int
+getPuzzleDifficulty = do
+    putStrLn "Wie viele Felder sollen leer sein? (1-64):"
+    input <- getLine
+    let emptyFields = read input :: Int
+    if emptyFields >= 1 && emptyFields <= 64
+        then return emptyFields
+        else do
+            putStrLn "Ungültige Zahl. Bitte einen Wert zwischen 1 und 60 eingeben."
+            getPuzzleDifficulty
+
 -- Aktualisiert das Sudoku-Feld mit der Benutzereingabe
-updateSudoku :: Sudoku -> IO Sudoku
-updateSudoku sudoku = do
+updateSudoku :: Sudoku -> Int -> IO (Sudoku, Int)
+updateSudoku sudoku errors = do
     (row, col, num) <- getUserInput
     if row == -1 || col == -1 || num == -1
         then do
             let (solvedSudoku, success) = solve sudoku
             if success
                 then do
-                    putStrLn "Das Sudoku wurde geloest!"
+                    putStrLn "\nDas Sudoku wurde geloest!"
                     printSudoku solvedSudoku
-                    return solvedSudoku
+                    return (solvedSudoku, errors)
                 else do
-                    putStrLn "Es wurde eine falsche zahl platziert"
-                    putStrLn "Sudoku ist so nicht loesbar"
-                    return sudoku
+                    putStrLn "Es wurde eine falsche Zahl platziert. Sudoku ist nicht lösbar."
+                    return (sudoku, errors)
         else if isValid sudoku row col num
-            then return (put sudoku row col num)
+            then return (put sudoku row col num, errors)
             else do
-                putStrLn "Ungueltige Eingabe, bitte versuchen es erneut."
+                putStrLn "\nUngueltige Eingabe, bitte versuchen es erneut.\n"
+                let newErrors = errors + 1
+                putStrLn $ "Fehleranzahl: \n" ++ show newErrors
                 printSudoku sudoku
-                updateSudoku sudoku
+                updateSudoku sudoku newErrors
 
 -- Hauptspiel-Funktion
-playSudoku :: Sudoku -> IO ()
-playSudoku sudoku = do
-  putStrLn "\nAktuelles Sudoku:\n---------------------"
-  printSudoku sudoku
-  if isSolved sudoku
-    then putStrLn "GZ. it's solved haha"
-    else do
-      updatedSudoku <- updateSudoku sudoku
-      playSudoku updatedSudoku
+playSudoku :: Sudoku -> Int -> IO ()
+playSudoku sudoku errors = do
+    putStrLn "\nAktuelles Sudoku:\n---------------------"
+    printSudoku sudoku
+    if isSolved sudoku
+        then putStrLn $ "Herzlichen Glückwunsch! Das Sudoku wurde gelöst mit " ++ show errors ++ " Fehler(n)."
+        else do
+            (updatedSudoku, newErrors) <- updateSudoku sudoku errors
+            playSudoku updatedSudoku newErrors
 
 -- Beispiel-Hauptfunktion
 main :: IO ()
 main = do
-  putStrLn "\nGeneriere ein zufaelliges Raetsel..."
-  putStrLn "\nMit -1 als Starteingabe loest du sofort das Sudoku"
-  generatedSudoku <- generateSudoku
-  puzzle <- generatePuzzle generatedSudoku 40  -- 40 Felder werden geleert
-  playSudoku puzzle
+    putStrLn "\nGeneriere ein zufaelliges Raetsel..."
+    putStrLn "\nMit -1 als Starteingabe loest du sofort das Sudoku."
+    emptyFields <- getPuzzleDifficulty
+    generatedSudoku <- generateSudoku
+    puzzle <- generatePuzzle generatedSudoku emptyFields
+    playSudoku puzzle 0
